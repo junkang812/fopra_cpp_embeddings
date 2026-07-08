@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+
+# macOS
+.DS_Store
+
+# Data
+data/
+!data/README.md
+
+# Embeddings / models
+*.pt
+*.pth
+*.npy
+
+# Generated results
+results/
+!results/figures/
+!results/figures/*.pngdata/embeddings/
+*.pt
