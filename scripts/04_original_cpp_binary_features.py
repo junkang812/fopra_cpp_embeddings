@@ -14,8 +14,7 @@ from sklearn.preprocessing import StandardScaler
 CSV_PATH = Path("data/processed/subset_500_fullseq.csv")
 EMB_PATH = Path("data/embeddings/esm2_65M/subset_499_fullseq_embeddings.pt")
 
-OUT_FEATURE_DIR = Path("results/cpp_features")
-OUT_FIG_DIR = Path("results/figures")
+OUT_FEATURE_DIR = Path("results/cpp_features/binary_feature")
 
 POST_CS_LEN = 15
 MAX_COR = 0.5
@@ -24,7 +23,6 @@ RANDOM_STATE = 42
 
 def main() -> None:
     OUT_FEATURE_DIR.mkdir(parents=True, exist_ok=True)
-    OUT_FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     aa.options["verbose"] = False
     aa.options["random_state"] = RANDOM_STATE
@@ -84,7 +82,7 @@ def main() -> None:
 
     print("Selected CPP features:", df_feat.shape)
 
-    feature_path = OUT_FEATURE_DIR / "original_cpp_selected_features.csv"
+    feature_path = OUT_FEATURE_DIR / "selected_features.csv"
     df_feat.to_csv(feature_path, index=False)
     print("Saved:", feature_path)
 
@@ -100,7 +98,7 @@ def main() -> None:
 
     np.save(OUT_FEATURE_DIR / "X_original_cpp_subset499.npy", X_cpp)
 
-    meta_path = OUT_FEATURE_DIR / "original_cpp_subset499_metadata.csv"
+    meta_path = OUT_FEATURE_DIR / "metadata.csv"
     df[["entry", "sp_type", "label_binary", "kingdom"]].to_csv(meta_path, index=False)
     print("Saved:", meta_path)
 

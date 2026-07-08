@@ -24,12 +24,15 @@ from sklearn.metrics import (
 )
 from sklearn.preprocessing import StandardScaler
 
-
-METRICS_DIR = Path("results/metrics")
-FIG_DIR = Path("results/figures")
+METRICS_DIR = Path("results/metrics/binary_feature")
+FIG_DIR = Path("results/figures/binary_feature")
+BINARY_DIR = FIG_DIR / "binary"
+MULTICLASS_DIR = FIG_DIR / "multiclass"
 
 METRICS_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
+BINARY_DIR.mkdir(parents=True, exist_ok=True)
+MULTICLASS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 DATASETS = {
@@ -44,13 +47,13 @@ DATASETS = {
         "label": "Pre-CS Emb.",
     },
     "original_cpp": {
-        "x_path": Path("results/cpp_features/X_original_cpp_subset499.npy"),
-        "meta_path": Path("results/cpp_features/original_cpp_subset499_metadata.csv"),
+        "x_path": Path("results/cpp_features/binary_feature/X_original_cpp_subset499.npy"),
+        "meta_path": Path("results/cpp_features/binary_feature/metadata.csv"),
         "label": "Original CPP",
     },
     "embedding_cpp": {
-        "x_path": Path("results/embedding_cpp/X_embedding_cpp_subset499.npy"),
-        "meta_path": Path("results/embedding_cpp/embedding_cpp_subset499_metadata.csv"),
+        "x_path": Path("results/embedding_cpp/binary_feature/X_embedding_cpp_subset499.npy"),
+        "meta_path": Path("results/embedding_cpp/binary_feature/metadata.csv"),
         "label": "Embedding-CPP",
     },
 }
@@ -111,15 +114,16 @@ def plot_summary(df_results, label_type):
         ax.tick_params(axis="x", rotation=25)
 
     fig.suptitle(
-        "Binary clustering metrics"
+        "Binary-selected feature space: binary labels"
         if label_type == "binary"
-        else "Multiclass clustering metrics",
+        else "Binary-selected feature space: SP type labels",
         fontsize=14,
-    )
+    )    
 
     plt.tight_layout()
 
-    out_path = FIG_DIR / f"clustering_metrics_{label_type}.png"
+    out_dir = BINARY_DIR if label_type == "binary" else MULTICLASS_DIR
+    out_path = out_dir / "clustering_metrics.png"    
     plt.savefig(out_path, dpi=300)
     plt.close()
 

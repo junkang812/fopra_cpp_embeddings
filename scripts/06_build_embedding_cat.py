@@ -6,8 +6,8 @@ from pathlib import Path
 import pandas as pd
 import aaanalysis as aa
 
-SCALES_PATH = Path("results/embedding_cpp/embedding_pseudo_scales.csv")
-CAT_PATH = Path("results/embedding_cpp/embedding_pseudo_cat.csv")
+SCALES_PATH = Path("results/embedding_cpp/shared/embedding_pseudo_scales.csv")
+CAT_PATH = Path("results/embedding_cpp/shared/embedding_pseudo_cat.csv")
 
 
 def main() -> None:

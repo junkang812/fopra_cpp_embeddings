@@ -22,7 +22,7 @@ import aaanalysis as aa
 CSV_PATH = Path("data/processed/subset_500_fullseq.csv")
 EMB_PATH = Path("data/embeddings/esm2_65M/subset_499_fullseq_embeddings.pt")
 
-OUT_DIR = Path("results/embedding_cpp")
+OUT_DIR = Path("results/embedding_cpp/shared")
 SCALES_PATH = OUT_DIR / "embedding_pseudo_scales.csv"
 
 

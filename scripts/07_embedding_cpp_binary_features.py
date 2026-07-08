@@ -1,5 +1,5 @@
 """
-Run embedding-based CPP on a SignalP subset.
+Generate embedding-based CPP features for a SignalP subset.
 
 Pipeline:
 1. Load full-sequence residue embeddings.
@@ -7,7 +7,7 @@ Pipeline:
 3. Load precomputed embedding pseudo-scales and pseudo-categories.
 4. Slice numerical embeddings into TMD and JMD_C parts.
 5. Run CPP numerical mode.
-6. Save selected features, feature matrix, metadata, and PCA plot.
+6. Save selected features, feature matrix, and metadata.
 """
 
 from pathlib import Path
@@ -15,25 +15,20 @@ from pathlib import Path
 import torch
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import aaanalysis as aa
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 
 
 CSV_PATH = Path("data/processed/subset_500_fullseq.csv")
 EMB_PATH = Path("data/embeddings/esm2_65M/subset_499_fullseq_embeddings.pt")
 
-OUT_DIR = Path("results/embedding_cpp")
-FIG_DIR = Path("results/figures")
+SHARED_DIR = Path("results/embedding_cpp/shared")
+OUT_DIR = Path("results/embedding_cpp/binary_feature")
 
-SCALES_PATH = OUT_DIR / "embedding_pseudo_scales.csv"
-CAT_PATH = OUT_DIR / "embedding_pseudo_cat.csv"
+SCALES_PATH = SHARED_DIR / "embedding_pseudo_scales.csv"
+CAT_PATH = SHARED_DIR / "embedding_pseudo_cat.csv"
 
 POST_LEN = 15
 TMD_LEN_REF = 24
-RANDOM_STATE = 42
-
 
 def load_embeddings(path: Path) -> dict[str, np.ndarray]:
     embeddings = torch.load(path, map_location="cpu")
@@ -56,41 +51,10 @@ def build_df_seq(df: pd.DataFrame) -> pd.DataFrame:
 
     return df_seq
 
-
-def plot_pca(X: np.ndarray, meta: pd.DataFrame, out_path: Path) -> None:
-    X_scaled = StandardScaler().fit_transform(X)
-
-    pca = PCA(n_components=2, random_state=RANDOM_STATE)
-    X_pca = pca.fit_transform(X_scaled)
-
-    meta = meta.copy()
-    meta["PC1"] = X_pca[:, 0]
-    meta["PC2"] = X_pca[:, 1]
-
-    print("Explained variance:", pca.explained_variance_ratio_, flush=True)
-
-    plt.figure(figsize=(8, 6))
-
-    for sp_type, sub in meta.groupby("sp_type"):
-        plt.scatter(sub["PC1"], sub["PC2"], label=sp_type, alpha=0.75, s=30)
-
-    plt.xlabel(f"PC1 ({pca.explained_variance_ratio_[0] * 100:.1f}%)")
-    plt.ylabel(f"PC2 ({pca.explained_variance_ratio_[1] * 100:.1f}%)")
-    plt.title("PCA of embedding-based CPP features")
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(out_path, dpi=300)
-    plt.close()
-
-    print("Saved PCA plot:", out_path, flush=True)
-
-
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    FIG_DIR.mkdir(parents=True, exist_ok=True)
 
     aa.options["verbose"] = False
-    aa.options["random_state"] = RANDOM_STATE
 
     df = pd.read_csv(CSV_PATH)
     embeddings = load_embeddings(EMB_PATH)
@@ -167,12 +131,12 @@ def main() -> None:
     print("Selected embedding-CPP features:", df_feat.shape, flush=True)
     print(df_feat.head(), flush=True)
 
-    feat_path = OUT_DIR / "embedding_cpp_selected_features.csv"
+    feat_path = OUT_DIR / "selected_features.csv"
     df_feat.to_csv(feat_path, index=False)
     print("Saved selected features:", feat_path, flush=True)
 
     print("Creating embedding-CPP feature matrix...", flush=True)
-    
+
     nf = aa.NumericalFeature()
 
     X_embed_cpp = nf.feature_matrix(
@@ -190,13 +154,9 @@ def main() -> None:
 
     meta = df[["entry", "sp_type", "label_binary", "kingdom"]].copy()
 
-    meta_path = OUT_DIR / "embedding_cpp_subset499_metadata.csv"
+    meta_path = OUT_DIR / "metadata.csv"
     meta.to_csv(meta_path, index=False)
     print("Saved metadata:", meta_path, flush=True)
-
-    pca_path = FIG_DIR / "pca_embedding_cpp_sp_type.png"
-    plot_pca(X_embed_cpp, meta, pca_path)
-
 
 if __name__ == "__main__":
     main()
